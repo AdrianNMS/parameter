@@ -80,14 +80,14 @@ public class ParameterControllers {
                 .doFinally(fin -> log.info("[END] Delete Parameter"));
     }
 
-    @GetMapping("/code/{code}")
-    public Mono<ResponseEntity<Object>> FindByCode(@PathVariable String code) {
+    @GetMapping(value ={"/catalogue/{code}","/catalogue/{code}/{value}"})
+    public Mono<ResponseEntity<Object>> FindByCode(@PathVariable String code,@PathVariable(required = false) String value) {
         log.info("[INI] FindByCode Parameter");
 
         Flux<Parameter> parameters = dao.findAll();
 
         return parameters
-                .filter(p -> p.getCode().toString().equals(code))
+                .filter(p -> p.getCode().toString().equals(code) && (value!=null?p.getValue().equals(value):true))
                 .doOnNext(p -> log.info(p.toString()))
                 .collectList().map(p -> ResponseHandler.response("Done", HttpStatus.OK, p))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
