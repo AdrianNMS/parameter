@@ -15,6 +15,8 @@ public class Parameter extends Audit {
 
     private Integer code;
 
+    private String value;
+
     private String name;
 
     private String argument;

@@ -88,9 +88,8 @@ public class ParameterControllers {
 
         return parameters
                 .filter(p -> p.getCode().toString().equals(code))
-                .next()
                 .doOnNext(p -> log.info(p.toString()))
-                .map(p -> ResponseHandler.response("Done", HttpStatus.OK, p))
+                .collectList().map(p -> ResponseHandler.response("Done", HttpStatus.OK, p))
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] FindByCode Parameter"));
 
