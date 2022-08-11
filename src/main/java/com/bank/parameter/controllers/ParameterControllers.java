@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/parameter")
 public class ParameterControllers {
@@ -22,8 +25,9 @@ public class ParameterControllers {
     private static final Logger log = LoggerFactory.getLogger(ParameterControllers.class);
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> Create(@RequestBody Parameter p) {
+    public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Parameter p) {
         log.info("[INI] Create Parameter");
+        p.setDateRegister(LocalDateTime.now());
         return dao.save(p)
                 .doOnNext(parameter -> log.info(parameter.toString()))
                 .map(parameter -> ResponseHandler.response("Done", HttpStatus.OK, parameter))
@@ -53,14 +57,16 @@ public class ParameterControllers {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id, @RequestBody Parameter p) {
+    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Parameter p) {
         log.info("[INI] Update Parameter");
         return dao.existsById(id).flatMap(check -> {
-                    if (check)
+                    if (check){
+                        p.setDateUpdate(LocalDateTime.now());
                         return dao.save(p)
                                 .doOnNext(parameter -> log.info(parameter.toString()))
                                 .map(parameter -> ResponseHandler.response("Done", HttpStatus.OK, parameter))
                                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)));
+                    }
                     else
                         return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
 
