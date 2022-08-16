@@ -3,6 +3,9 @@ package com.bank.parameter.controllers;
 import com.bank.parameter.handler.ResponseHandler;
 import com.bank.parameter.models.dao.ParameterDao;
 import com.bank.parameter.models.documents.Parameter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,10 @@ public class ParameterControllers {
     private ParameterDao dao;
 
     private static final Logger log = LoggerFactory.getLogger(ParameterControllers.class);
+    private static final String RESILENCE_SERVICE = "defaultConfig";
 
+    @TimeLimiter(name = RESILENCE_SERVICE)
+    @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedCreate")
     @PostMapping
     public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Parameter p) {
         log.info("[INI] Create Parameter");
@@ -34,6 +40,7 @@ public class ParameterControllers {
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] Create Parameter"));
     }
+
 
     @GetMapping
     public Mono<ResponseEntity<Object>> FindAll() {
@@ -56,6 +63,8 @@ public class ParameterControllers {
                 .doFinally(fin -> log.info("[END] Find Parameter"));
     }
 
+    @TimeLimiter(name = RESILENCE_SERVICE)
+    @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedUpdate")
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Parameter p) {
         log.info("[INI] Update Parameter");
@@ -74,6 +83,8 @@ public class ParameterControllers {
                 .doFinally(fin -> log.info("[END] Update Parameter"));
     }
 
+    @TimeLimiter(name = RESILENCE_SERVICE)
+    @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedDelete")
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Object>> Delete(@PathVariable("id") String id) {
         log.info("[INI] Delete Parameter");
@@ -86,6 +97,8 @@ public class ParameterControllers {
                 .doFinally(fin -> log.info("[END] Delete Parameter"));
     }
 
+    @TimeLimiter(name = RESILENCE_SERVICE)
+    @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedFindByCode")
     @GetMapping(value ={"/catalogue/{code}"})
     public Mono<ResponseEntity<Object>> FindByCode(@PathVariable String code) {
         log.info("[INI] FindByCode Parameter");
@@ -104,5 +117,42 @@ public class ParameterControllers {
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] FindByCode Parameter"));
 
+    }
+
+    public ResponseEntity<Object> failedCreate(Parameter p, Exception e)
+    {
+        log.error("[INIT] Failed Create");
+        log.error(e.getMessage());
+        log.error(p.toString());
+        log.error("[END] Failed Create");
+        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
+    }
+
+    public ResponseEntity<Object> failedUpdate(String id, Parameter p, Exception e)
+    {
+        log.error("[INIT] Failed Update");
+        log.error(e.getMessage());
+        log.error(id);
+        log.error(p.toString());
+        log.error("[END] Failed Update");
+        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
+    }
+
+    public ResponseEntity<Object> failedDelete(String id, Exception e)
+    {
+        log.error("[INIT] Failed Delete");
+        log.error(e.getMessage());
+        log.error(id);
+        log.error("[END] Failed Delete");
+        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
+    }
+
+    public ResponseEntity<Object> failedFindByCode(String code,Exception e)
+    {
+        log.error("[INIT] Failed FindCode");
+        log.error(e.getMessage());
+        log.error(code);
+        log.error("[END] Failed FindCode");
+        return ResponseHandler.response("Overcharged method", HttpStatus.OK, null);
     }
 }
