@@ -99,21 +99,22 @@ public class ParameterControllers {
 
     @TimeLimiter(name = RESILENCE_SERVICE)
     @CircuitBreaker(name = RESILENCE_SERVICE,fallbackMethod ="failedFindByCode")
-    @GetMapping(value ={"/catalogue/{code}"})
-    public Mono<ResponseEntity<Object>> FindByCode(@PathVariable String code) {
+    @GetMapping(value ={"/catalogue/{clientType}/{code}"})
+    public Mono<ResponseEntity<Object>> FindByCode(@PathVariable Integer clientType, @PathVariable Integer code) {
         log.info("[INI] FindByCode Parameter");
 
         Flux<Parameter> parameters = dao.findAll();
 
         return parameters
-                .filter(p -> p.getCode().toString().equals(code))
+                .filter(p -> p.getCode().equals(code) && p.checkClientType(clientType))
                 .doOnNext(p -> log.info(p.toString()))
-                .collectList().flatMap(p -> {
-                            if(!p.isEmpty())
-                                return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, p.get(0)));
-                            else
-                                return Mono.just(ResponseHandler.response("Not Found", HttpStatus.BAD_REQUEST, null));
-                        })
+                .collectList().flatMap(p ->
+                {
+                    if(!p.isEmpty())
+                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, p.get(0)));
+                    else
+                        return Mono.just(ResponseHandler.response("Not Found", HttpStatus.BAD_REQUEST, null));
+                })
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] FindByCode Parameter"));
 
