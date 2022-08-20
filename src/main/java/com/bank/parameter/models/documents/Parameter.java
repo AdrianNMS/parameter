@@ -15,7 +15,8 @@ public class Parameter extends Audit {
     private String id;
     @NotNull(message = "code must not be null")
     private Integer code;
-
+    @NotNull(message = "name must not be null")
+    private String name;
     private ClientType clientType;
     @NotNull(message = "comissionPercentage must not be null")
     private Float comissionPercentage;
@@ -30,10 +31,7 @@ public class Parameter extends Audit {
 
     public boolean checkClientType(Integer clientType)
     {
-        if(getClientType() == null)
-            return true;
-        else
-            return getClientType().getValue() == clientType;
+        return getClientType().getValue() == clientType;
     }
 
 }
