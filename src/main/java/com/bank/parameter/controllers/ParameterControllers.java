@@ -3,17 +3,20 @@ package com.bank.parameter.controllers;
 import com.bank.parameter.handler.ResponseHandler;
 import com.bank.parameter.models.dao.ParameterDao;
 import com.bank.parameter.models.documents.Parameter;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/parameter")
@@ -105,6 +108,38 @@ public class ParameterControllers {
                 })
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] FindByCode Parameter"));
+    }
+
+    @PostMapping("/init")
+    public Flux<Parameter> initParams()
+    {
+        List<String> listParams = new ArrayList<String>();
+        listParams.add(
+                "{\"code\":1000,\"clientType\":0,\"name\": \"Cuenta ahorro - normal\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"10\",\"maxMovement\":20,\"percentageMaxMovement\":0.1}"
+        );
+        listParams.add(
+                "{\"code\":1001,\"clientType\":0,\"name\": \"Cuenta corriente - normal\",\"comissionPercentage\":0.1,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"INFINITY\",\"maxMovement\":20,\"percentageMaxMovement\":0.1}"
+        );
+        listParams.add(
+                "{\"code\":1002,\"clientType\":0,\"name\": \"Cuenta plazo fijo - normal\",\"comissionPercentage\":0,\"transactionDay\":\"true\",\"maxMovementPerMonth\":\"1\",\"maxMovement\":2,\"percentageMaxMovement\":0.1}"
+        );
+        listParams.add(
+                "{\"code\":1002,\"clientType\":1,\"name\": \"Cuenta plazo fijo - normal\",\"comissionPercentage\":0,\"transactionDay\":\"true\",\"maxMovementPerMonth\":\"1\",\"maxMovement\":2,\"percentageMaxMovement\":0.1}"
+        );
+        listParams.add(
+                "{\"code\":1000,\"clientType\":1,\"name\": \"Cuenta ahorro - vip\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"100\",\"maxMovement\":100,\"percentageMaxMovement\":0}"
+        );
+        listParams.add(
+                "{\"code\":1001,\"clientType\":1,\"name\": \"Cuenta corriente - Pyme\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"INFINITY\",\"maxMovement\":100,\"percentageMaxMovement\":0}"
+        );
+
+
+        return dao.saveAll(
+                listParams.stream().map(s -> new Gson().fromJson(s,Parameter.class)).collect(Collectors.toList())
+        );
+
+
+
     }
 
 
