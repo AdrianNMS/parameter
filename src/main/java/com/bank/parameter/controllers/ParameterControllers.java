@@ -3,6 +3,7 @@ package com.bank.parameter.controllers;
 import com.bank.parameter.handler.ResponseHandler;
 import com.bank.parameter.models.dao.ParameterDao;
 import com.bank.parameter.models.documents.Parameter;
+import com.bank.parameter.models.enums.ClientType;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,7 @@ public class ParameterControllers {
         Flux<Parameter> parameters = dao.findAll();
 
         return parameters
-                .filter(p -> p.getCode().equals(code) && p.checkClientType(clientType))
-                .doOnNext(p -> log.info(p.toString()))
+                .filter(p -> p.getCode().equals(code) && p.getClientType().getValue() == clientType)
                 .collectList().flatMap(p ->
                 {
                     if(!p.isEmpty())
@@ -113,30 +113,73 @@ public class ParameterControllers {
     @PostMapping("/init")
     public Flux<Parameter> initParams()
     {
-        List<String> listParams = new ArrayList<String>();
-        listParams.add(
-                "{\"code\":1000,\"clientType\":0,\"name\": \"Cuenta ahorro - normal\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"10\",\"maxMovement\":20,\"percentageMaxMovement\":0.1}"
-        );
-        listParams.add(
-                "{\"code\":1001,\"clientType\":0,\"name\": \"Cuenta corriente - normal\",\"comissionPercentage\":0.1,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"INFINITY\",\"maxMovement\":20,\"percentageMaxMovement\":0.1}"
-        );
-        listParams.add(
-                "{\"code\":1002,\"clientType\":0,\"name\": \"Cuenta plazo fijo - normal\",\"comissionPercentage\":0,\"transactionDay\":\"true\",\"maxMovementPerMonth\":\"1\",\"maxMovement\":2,\"percentageMaxMovement\":0.1}"
-        );
-        listParams.add(
-                "{\"code\":1002,\"clientType\":1,\"name\": \"Cuenta plazo fijo - normal\",\"comissionPercentage\":0,\"transactionDay\":\"true\",\"maxMovementPerMonth\":\"1\",\"maxMovement\":2,\"percentageMaxMovement\":0.1}"
-        );
-        listParams.add(
-                "{\"code\":1000,\"clientType\":1,\"name\": \"Cuenta ahorro - vip\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"100\",\"maxMovement\":100,\"percentageMaxMovement\":0}"
-        );
-        listParams.add(
-                "{\"code\":1001,\"clientType\":1,\"name\": \"Cuenta corriente - Pyme\",\"comissionPercentage\":0,\"transactionDay\":\"false\",\"maxMovementPerMonth\":\"INFINITY\",\"maxMovement\":100,\"percentageMaxMovement\":0}"
-        );
+        List<Parameter> parameterList = new ArrayList<>();
 
 
-        return dao.saveAll(
-                listParams.stream().map(s -> new Gson().fromJson(s,Parameter.class)).collect(Collectors.toList())
-        );
+        parameterList.add(Parameter.builder()
+                .code(1000)
+                .clientType(ClientType.STANDARD)
+                .name("Cuenta ahorro - normal")
+                .comissionPercentage(0.0f)
+                .transactionDay("false")
+                .maxMovementPerMonth("10")
+                .maxMovement(20)
+                .percentageMaxMovement(0.1f)
+                .build());
+        parameterList.add(Parameter.builder()
+                .code(1001)
+                .clientType(ClientType.STANDARD)
+                .name("Cuenta corriente - normal")
+                .comissionPercentage(0.1f)
+                .transactionDay("false")
+                .maxMovementPerMonth("INFINITY")
+                .maxMovement(20)
+                .percentageMaxMovement(0.1f)
+                .build());
+        parameterList.add(Parameter.builder()
+                .clientType(ClientType.STANDARD)
+                .code(1002)
+                .name("Cuenta plazo fijo - normal")
+                .comissionPercentage(0.0f)
+                .transactionDay("true")
+                .maxMovementPerMonth("1")
+                .maxMovement(2)
+                .percentageMaxMovement(0.1f)
+                .build());
+        parameterList.add(Parameter.builder()
+                .clientType(ClientType.SPECIAL)
+                .code(1002)
+                .name("Cuenta plazo fijo - normal")
+                .comissionPercentage(0.0f)
+                .transactionDay("true")
+                .maxMovementPerMonth("1")
+                .maxMovement(2)
+                .percentageMaxMovement(0.1f)
+                .build());
+        parameterList.add(Parameter.builder()
+                .clientType(ClientType.SPECIAL)
+                .code(1000)
+                .name("Cuenta ahorro - vip")
+                .comissionPercentage(0.0f)
+                .transactionDay("false")
+                .maxMovementPerMonth("100")
+                .maxMovement(100)
+                .percentageMaxMovement(0.0f)
+                .build());
+        parameterList.add(Parameter.builder()
+                .clientType(ClientType.SPECIAL)
+                .code(1001)
+                .name("Cuenta corriente - Pyme")
+                .comissionPercentage(0.0f)
+                .transactionDay("false")
+                .maxMovementPerMonth("INFINITY")
+                .maxMovement(100)
+                .percentageMaxMovement(0.0f)
+                .build());
+
+
+
+        return dao.saveAll(parameterList);
 
 
 

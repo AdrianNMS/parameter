@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public enum ClientType
 {
-    PERSONAL(0),
-    COMPANY(1);
+    STANDARD(0),
+    SPECIAL(1);
 
     private final int value;
 }

@@ -2,12 +2,14 @@ package com.bank.parameter.models.documents;
 
 import com.bank.parameter.models.enums.ClientType;
 import com.bank.parameter.models.utils.Audit;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 
+@Builder
 @Data
 @Document(collection = "parameters")
 public class Parameter extends Audit {
@@ -17,6 +19,7 @@ public class Parameter extends Audit {
     private Integer code;
     @NotNull(message = "name must not be null")
     private String name;
+    @NotNull(message = "clientType must not be null")
     private ClientType clientType;
     @NotNull(message = "comissionPercentage must not be null")
     private Float comissionPercentage;
@@ -28,10 +31,5 @@ public class Parameter extends Audit {
     private Integer maxMovement;
     @NotNull(message = "percentageMaxMovement must not be null")
     private Float percentageMaxMovement;
-
-    public boolean checkClientType(Integer clientType)
-    {
-        return getClientType().getValue() == clientType;
-    }
 
 }
