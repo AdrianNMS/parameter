@@ -104,10 +104,7 @@ public class ParameterRestControllersTest
                 .percentageMaxMovement(0.1f)
                 .build();
 
-        var list = new ArrayList<Parameter>();
-        list.add(parameter);
-
-        var parameterFlux = Flux.fromIterable(list);
+        var parameterFlux = Flux.just(parameter);
 
         Mockito.when(dao.findAll()).thenReturn(parameterFlux);
 
@@ -179,6 +176,38 @@ public class ParameterRestControllersTest
                 .expectBody(ResponseParameter.class)
                 .value(responseParameter -> {
                     Assertions.assertThat(responseParameter.getStatus()).isEqualTo("OK");
+                });
+    }
+
+    @Test
+    void FindByCode()
+    {
+        var parameter = Parameter.builder()
+                .id("1")
+                .code(1000)
+                .clientType(ClientType.STANDARD)
+                .name("Cuenta ahorro - normal")
+                .comissionPercentage(0.0f)
+                .transactionDay("false")
+                .maxMovementPerMonth("10")
+                .maxMovement(20)
+                .percentageMaxMovement(0.1f)
+                .build();
+
+
+        var parameterFlux = Flux.just(parameter);
+
+        Mockito.when(dao.findAll()).thenReturn(parameterFlux);
+
+        webTestClient.get().uri("/api/parameter/catalogue/{clientType}/{code}",0,1000)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ResponseParameter.class)
+                .value(responseParameter -> {
+                    var parameterR = responseParameter.getData();
+                    Assertions.assertThat(parameterR.getCode()).isEqualTo(1000);
                 });
     }
 }
