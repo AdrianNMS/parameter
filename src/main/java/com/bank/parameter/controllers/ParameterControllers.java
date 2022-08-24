@@ -110,10 +110,11 @@ public class ParameterControllers {
     }
 
     @PostMapping("/init")
-    public Flux<Parameter> initParams()
+    public Mono<ResponseEntity<Object>> initParams()
     {
         List<Parameter> parameterList = new ArrayList<>();
 
+        log.info("[INI] initParams Parameter");
 
         parameterList.add(Parameter.builder()
                 .code(1000)
@@ -178,7 +179,16 @@ public class ParameterControllers {
 
 
 
-        return dao.saveAll(parameterList);
+        return dao.saveAll(parameterList)
+                .collectList().flatMap(p ->
+                {
+                    if(!p.isEmpty())
+                        return Mono.just(ResponseHandler.response("Done", HttpStatus.OK, p));
+                    else
+                        return Mono.just(ResponseHandler.response("Not Found", HttpStatus.BAD_REQUEST, null));
+                })
+                .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
+                .doFinally(fin -> log.info("[END] initParams Parameter"));
 
 
 

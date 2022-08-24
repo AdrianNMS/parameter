@@ -16,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @WebFluxTest
@@ -27,6 +28,42 @@ public class ParameterRestControllersTest
     @MockBean
     ParameterDao dao;
 
+
+    @Test
+    void init()
+    {
+        /*var parameter = Parameter.builder()
+                .id("1")
+                .code(1000)
+                .clientType(ClientType.STANDARD)
+                .name("Cuenta ahorro - normal")
+                .comissionPercentage(0.0f)
+                .transactionDay("false")
+                .maxMovementPerMonth("10")
+                .maxMovement(20)
+                .percentageMaxMovement(0.1f)
+                .build();
+
+        var parameters = new ArrayList<Parameter>();
+        parameters.add(parameter);
+
+        var list = Flux.just(parameter);
+
+
+        webTestClient.post()
+                .uri("/api/parameter/init")
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<List<Parameter>>>(){})
+                .value(responseParameterFindAll -> {
+                    var parameterList = responseParameterFindAll.getData();
+                    Assertions.assertThat(parameterList.size()).isNotEqualTo(0);
+                });
+
+        */
+    }
 
     @Test
     void create()
@@ -45,9 +82,6 @@ public class ParameterRestControllersTest
 
         var parameterMono = Mono.just(parameter);
         Mockito.when(dao.save(parameter)).thenReturn(parameterMono);
-
-        ResponseParameter<Parameter> x = new ResponseParameter<>();
-
 
         webTestClient.post()
                 .uri("/api/parameter")
