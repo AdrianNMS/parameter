@@ -2,14 +2,18 @@ package com.bank.parameter.models.documents;
 
 import com.bank.parameter.models.enums.ClientType;
 import com.bank.parameter.models.utils.Audit;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Document(collection = "parameters")
 public class Parameter extends Audit {

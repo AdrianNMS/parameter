@@ -1,7 +1,6 @@
 package com.bank.parameter.controllers;
 
 import com.bank.parameter.controllers.models.ResponseParameter;
-import com.bank.parameter.controllers.models.ResponseParameterFindAll;
 import com.bank.parameter.models.dao.ParameterDao;
 import com.bank.parameter.models.documents.Parameter;
 import com.bank.parameter.models.enums.ClientType;
@@ -11,12 +10,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @WebFluxTest
 public class ParameterRestControllersTest
@@ -26,6 +26,7 @@ public class ParameterRestControllersTest
 
     @MockBean
     ParameterDao dao;
+
 
     @Test
     void create()
@@ -45,6 +46,9 @@ public class ParameterRestControllersTest
         var parameterMono = Mono.just(parameter);
         Mockito.when(dao.save(parameter)).thenReturn(parameterMono);
 
+        ResponseParameter<Parameter> x = new ResponseParameter<>();
+
+
         webTestClient.post()
                 .uri("/api/parameter")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +56,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameter.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<Parameter>>(){})
                 .value(responseParameter -> {
                     var parameterR = responseParameter.getData();
                     Assertions.assertThat(parameterR.getId()).isEqualTo("1");
@@ -82,7 +86,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameter.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<Parameter>>(){})
                 .value(responseParameter -> {
                     var parameterR = responseParameter.getData();
                     Assertions.assertThat(parameterR.getId()).isEqualTo("1");
@@ -113,7 +117,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameterFindAll.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<List<Parameter>>>(){})
                 .value(responseParameterFindAll -> {
                     var parameterList = responseParameterFindAll.getData();
                     parameterList.forEach(parameter1 -> {
@@ -151,7 +155,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameter.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<Parameter>>(){})
                 .value(responseParameter -> {
                     var parameterR = responseParameter.getData();
                     Assertions.assertThat(parameterR.getId()).isEqualTo("1");
@@ -173,7 +177,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameter.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<Parameter>>(){})
                 .value(responseParameter -> {
                     Assertions.assertThat(responseParameter.getStatus()).isEqualTo("OK");
                 });
@@ -204,7 +208,7 @@ public class ParameterRestControllersTest
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(ResponseParameter.class)
+                .expectBody(new ParameterizedTypeReference<ResponseParameter<Parameter>>(){})
                 .value(responseParameter -> {
                     var parameterR = responseParameter.getData();
                     Assertions.assertThat(parameterR.getCode()).isEqualTo(1000);

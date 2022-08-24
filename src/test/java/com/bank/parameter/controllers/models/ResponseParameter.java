@@ -1,12 +1,11 @@
 package com.bank.parameter.controllers.models;
 
-import com.bank.parameter.models.documents.Parameter;
 import lombok.Data;
 
 @Data
-public class ResponseParameter
+public class ResponseParameter<T>
 {
-    private Parameter data;
+    private T data;
 
     private String message;
 
