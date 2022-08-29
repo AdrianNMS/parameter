@@ -28,7 +28,7 @@ public class ParameterControllers {
     private static final Logger log = LoggerFactory.getLogger(ParameterControllers.class);
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> Create(@Valid @RequestBody Parameter p) {
+    public Mono<ResponseEntity<Object>> create(@Valid @RequestBody Parameter p) {
         log.info("[INI] Create Parameter");
         p.setDateRegister(LocalDateTime.now());
         return dao.save(p)
@@ -38,9 +38,8 @@ public class ParameterControllers {
                 .doFinally(fin -> log.info("[END] Create Parameter"));
     }
 
-
     @GetMapping
-    public Mono<ResponseEntity<Object>> FindAll() {
+    public Mono<ResponseEntity<Object>> findAll() {
         log.info("[INI] FindAll Parameter");
         return dao.findAll()
                 .doOnNext(parameter -> log.info(parameter.toString()))
@@ -51,7 +50,7 @@ public class ParameterControllers {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Find(@PathVariable String id) {
+    public Mono<ResponseEntity<Object>> find(@PathVariable String id) {
         log.info("[INI] Find Parameter");
         return dao.findById(id)
                 .doOnNext(parameter -> log.info(parameter.toString()))
@@ -61,10 +60,10 @@ public class ParameterControllers {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Update(@PathVariable("id") String id,@Valid @RequestBody Parameter p) {
+    public Mono<ResponseEntity<Object>> update(@PathVariable("id") String id,@Valid @RequestBody Parameter p) {
         log.info("[INI] Update Parameter");
         return dao.existsById(id).flatMap(check -> {
-                    if (check){
+                    if (Boolean.TRUE.equals(check)){
                         p.setDateUpdate(LocalDateTime.now());
                         return dao.save(p)
                                 .doOnNext(parameter -> log.info(parameter.toString()))
@@ -79,10 +78,10 @@ public class ParameterControllers {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Object>> Delete(@PathVariable("id") String id) {
+    public Mono<ResponseEntity<Object>> delete(@PathVariable("id") String id) {
         log.info("[INI] Delete Parameter");
         return dao.existsById(id).flatMap(check -> {
-                    if (check)
+                    if (Boolean.TRUE.equals(check))
                         return dao.deleteById(id).then(Mono.just(ResponseHandler.response("Done", HttpStatus.OK, null)));
                     else
                         return Mono.just(ResponseHandler.response("Not found", HttpStatus.NOT_FOUND, null));
@@ -91,7 +90,7 @@ public class ParameterControllers {
     }
 
     @GetMapping(value ={"/catalogue/{clientType}/{code}"})
-    public Mono<ResponseEntity<Object>> FindByCode(@PathVariable Integer clientType, @PathVariable Integer code) {
+    public Mono<ResponseEntity<Object>> findByCode(@PathVariable Integer clientType, @PathVariable Integer code) {
         log.info("[INI] FindByCode Parameter");
 
         Flux<Parameter> parameters = dao.findAll();
@@ -177,8 +176,6 @@ public class ParameterControllers {
                 .percentageMaxMovement(0.0f)
                 .build());
 
-
-
         return dao.saveAll(parameterList)
                 .collectList().flatMap(p ->
                 {
@@ -189,9 +186,6 @@ public class ParameterControllers {
                 })
                 .onErrorResume(error -> Mono.just(ResponseHandler.response(error.getMessage(), HttpStatus.BAD_REQUEST, null)))
                 .doFinally(fin -> log.info("[END] initParams Parameter"));
-
-
-
     }
 
 

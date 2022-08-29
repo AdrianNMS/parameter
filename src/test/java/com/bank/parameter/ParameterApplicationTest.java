@@ -3,11 +3,13 @@ package com.bank.parameter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-class ParameterApplicationTests {
+class ParameterApplicationTest {
 
     @Test
-    void contextLoads() {
+    void main() {
+        ParameterApplication.main(new String[] {});
     }
-
 }
